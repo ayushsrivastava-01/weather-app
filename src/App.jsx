@@ -18,7 +18,15 @@ export default function App() {
   const unitSymbol = unit === "metric" ? "°C" : "°F";
   const speedUnit = unit === "metric" ? "m/s" : "mph";
 
-  // AQI 0-500 calculation
+  // Round time into blocks like 6:00, 9:00, 12:00
+  const roundTime = (timestamp) => {
+    const d = new Date(timestamp * 1000);
+    let hour = d.getHours();
+    const rounded = Math.round(hour / 3) * 3;
+    return `${String(rounded).padStart(2, "0")}:00`;
+  };
+
+  // AQI Calculation
   const calculateAQI = (pm25) => {
     if (pm25 <= 12.0) return Math.round((50 / 12.0) * pm25);
     if (pm25 <= 35.4) return 50 + Math.round((50 / 23.4) * (pm25 - 12.1));
@@ -58,12 +66,14 @@ export default function App() {
       setError("");
 
       const isCoords = query.includes("lat=");
+
       const url = isCoords
         ? `https://api.openweathermap.org/data/2.5/weather?${query}&appid=${API_KEY}&units=${unit}`
         : `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${API_KEY}&units=${unit}`;
 
       const res = await fetch(url);
       if (!res.ok) throw new Error("City not found");
+
       const data = await res.json();
 
       setWeather(data);
@@ -71,30 +81,34 @@ export default function App() {
       setSearch("");
       setBgClass(getWeatherBackground(data.weather[0].main));
 
-      // Forecast
+      // Forecast (6 days)
       const fRes = await fetch(
         `https://api.openweathermap.org/data/2.5/forecast?lat=${data.coord.lat}&lon=${data.coord.lon}&appid=${API_KEY}&units=${unit}`
       );
       const fData = await fRes.json();
+
       setHourly(fData.list.slice(0, 12));
 
       const groups = {};
-      fData.list.forEach(item => {
+      fData.list.forEach((item) => {
         const date = item.dt_txt.split(" ")[0];
         groups[date] = groups[date] || [];
         groups[date].push(item);
       });
 
-      const daily = Object.values(groups).slice(0, 5).map(day => {
-        const temps = day.map(d => d.main.temp);
-        const mid = day[Math.floor(day.length / 2)];
-        return {
-          date: mid.dt,
-          max: Math.max(...temps),
-          min: Math.min(...temps),
-          icon: mid.weather[0].icon,
-        };
-      });
+      const daily = Object.values(groups)
+        .slice(0, 6)
+        .map((day) => {
+          const temps = day.map((d) => d.main.temp);
+          const mid = day[Math.floor(day.length / 2)];
+          return {
+            date: mid.dt,
+            max: Math.max(...temps),
+            min: Math.min(...temps),
+            icon: mid.weather[0].icon,
+          };
+        });
+
       setForecast(daily);
 
       // Air Quality
@@ -102,9 +116,9 @@ export default function App() {
         `https://api.openweathermap.org/data/2.5/air_pollution?lat=${data.coord.lat}&lon=${data.coord.lon}&appid=${API_KEY}`
       );
       const airData = await airRes.json();
+
       const realAQI = calculateAQI(airData.list[0].components.pm2_5);
       setAir({ ...airData.list[0], realAQI });
-
     } catch (err) {
       setError("City not found or network issue");
     } finally {
@@ -123,7 +137,10 @@ export default function App() {
 
   const getLocation = () => {
     navigator.geolocation.getCurrentPosition(
-      pos => fetchAllData(`lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`),
+      (pos) =>
+        fetchAllData(
+          `lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`
+        ),
       () => setError("Location access denied")
     );
   };
@@ -134,15 +151,26 @@ export default function App() {
 
         <header className="header">
           <h1 className="logo">WeatherX</h1>
-          <button onClick={() => setUnit(u => u === "metric" ? "imperial" : "metric")} className="unit-btn">
+          <button
+            onClick={() =>
+              setUnit((u) => (u === "metric" ? "imperial" : "metric"))
+            }
+            className="unit-btn"
+          >
             {unit === "metric" ? "°F" : "°C"}
           </button>
         </header>
 
         <form onSubmit={handleSearch} className="search-bar">
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search city..." />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search city..."
+          />
           <button type="submit">Search</button>
-          <button type="button" onClick={getLocation}>My Location</button>
+          <button type="button" onClick={getLocation}>
+            My Location
+          </button>
         </form>
 
         {loading && <div className="status">Loading...</div>}
@@ -151,15 +179,28 @@ export default function App() {
         {weather && (
           <>
             <div className="current-card">
-              <img src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@4x.png`} alt="" />
+              <img
+                src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@4x.png`}
+                alt=""
+              />
+
               <div className="info">
                 <h2>{city}</h2>
-                <h1>{Math.round(weather.main.temp)}{unitSymbol}</h1>
+                <h1>
+                  {Math.round(weather.main.temp)}
+                  {unitSymbol}
+                </h1>
                 <p className="desc">{weather.weather[0].description}</p>
+
                 <div className="stats">
                   <span>Humidity: {weather.main.humidity}%</span>
-                  <span>Wind: {weather.wind.speed} {speedUnit}</span>
-                  <span>Feels like: {Math.round(weather.main.feels_like)}{unitSymbol}</span>
+                  <span>
+                    Wind: {weather.wind.speed} {speedUnit}
+                  </span>
+                  <span>
+                    Feels like: {Math.round(weather.main.feels_like)}
+                    {unitSymbol}
+                  </span>
                 </div>
               </div>
             </div>
@@ -167,34 +208,56 @@ export default function App() {
             {air && (
               <div className="card aqi">
                 <h3>Air Quality Index</h3>
-                <div className="aqi-value" style={{ color: getAQIInfo(air.realAQI).color }}>
+                <div
+                  className="aqi-value"
+                  style={{ color: getAQIInfo(air.realAQI).color }}
+                >
                   {air.realAQI} <span>{getAQIInfo(air.realAQI).text}</span>
                 </div>
                 <p>PM2.5: {air.components.pm2_5.toFixed(1)} µg/m³</p>
               </div>
             )}
 
+            {/* Hourly */}
             <div className="card">
               <h3 className="section-title">Hourly Forecast</h3>
               <div className="hourly-grid">
                 {hourly.map((h, i) => (
                   <div key={i} className="h-item">
-                    <p>{new Date(h.dt * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-                    <img src={`https://openweathermap.org/img/wn/${h.weather[0].icon}.png`} alt="" />
-                    <p>{Math.round(h.main.temp)}{unitSymbol}</p>
+                    <p>{roundTime(h.dt)}</p>
+                    <img
+                      src={`https://openweathermap.org/img/wn/${h.weather[0].icon}.png`}
+                      alt=""
+                    />
+                    <p>
+                      {Math.round(h.main.temp)}
+                      {unitSymbol}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
 
+            {/* 6 Days */}
             <div className="card">
-              <h3 className="section-title">5-Day Forecast</h3>
+              <h3 className="section-title">6-Day Forecast</h3>
               <div className="daily-grid">
                 {forecast.map((d, i) => (
                   <div key={i} className="d-item">
-                    <p>{new Date(d.date * 1000).toLocaleDateString("en", { weekday: "short" })}</p>
-                    <img src={`https://openweathermap.org/img/wn/${d.icon}.png`} alt="" />
-                    <p>{Math.round(d.max)}{unitSymbol} / {Math.round(d.min)}{unitSymbol}</p>
+                    <p>
+                      {new Date(d.date * 1000).toLocaleDateString("en", {
+                        weekday: "short",
+                      })}
+                    </p>
+                    <img
+                      src={`https://openweathermap.org/img/wn/${d.icon}.png`}
+                      alt=""
+                    />
+                    <p>
+                      {Math.round(d.max)}
+                      {unitSymbol} / {Math.round(d.min)}
+                      {unitSymbol}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -203,10 +266,15 @@ export default function App() {
         )}
 
         <footer className="footer">
-          <p>Made with care by <strong>XYZ</strong> • xyz@example.com</p>
-          <p className="disclaimer">This app can make mistakes – weather is unpredictable!</p>
+          <p>
+            Made with care by <strong>Ayush Srivastava</strong> •
+            srivastava999ayush@gmail.com
+          </p>
+          <p className="disclaimer">
+            Accuracy is not guaranteed. Weather dynamics introduce inherent
+            unpredictability!!!
+          </p>
         </footer>
-
       </div>
     </div>
   );
