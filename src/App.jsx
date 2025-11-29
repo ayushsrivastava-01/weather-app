@@ -18,6 +18,26 @@ export default function App() {
   const unitSymbol = unit === "metric" ? "°C" : "°F";
   const speedUnit = unit === "metric" ? "m/s" : "mph";
 
+  // Simple weather descriptions for better user understanding
+  const getSimpleWeatherDesc = (description) => {
+    const desc = description.toLowerCase();
+    if (desc.includes('clear')) return 'Sunny';
+    if (desc.includes('cloud')) return 'Cloudy';
+    if (desc.includes('rain')) return 'Rainy';
+    if (desc.includes('drizzle')) return 'Light Rain';
+    if (desc.includes('thunderstorm')) return 'Storm';
+    if (desc.includes('snow')) return 'Snow';
+    if (desc.includes('mist') || desc.includes('fog') || desc.includes('haze')) return 'Foggy';
+    if (desc.includes('overcast')) return 'Overcast';
+    return 'Clear';
+  };
+
+  // Check if it's currently day time based on sunrise and sunset
+  const isDayTime = (sunrise, sunset) => {
+    const currentTime = Math.floor(Date.now() / 1000);
+    return currentTime > sunrise && currentTime < sunset;
+  };
+
   // Round time into blocks like 6:00, 9:00, 12:00
   const roundTime = (timestamp) => {
     const d = new Date(timestamp * 1000);
@@ -106,6 +126,7 @@ export default function App() {
             max: Math.max(...temps),
             min: Math.min(...temps),
             icon: mid.weather[0].icon,
+            weatherDesc: mid.weather[0].description,
           };
         });
 
@@ -185,7 +206,14 @@ export default function App() {
               />
 
               <div className="info">
-                <h2>{city}</h2>
+                <div className="location-time">
+                  <h2>{city}</h2>
+                  {weather && (
+                    <span className="time-indicator">
+                      {isDayTime(weather.sys.sunrise, weather.sys.sunset) ? '☀️ Day' : '🌙 Night'}
+                    </span>
+                  )}
+                </div>
                 <h1>
                   {Math.round(weather.main.temp)}
                   {unitSymbol}
@@ -229,6 +257,7 @@ export default function App() {
                       src={`https://openweathermap.org/img/wn/${h.weather[0].icon}.png`}
                       alt=""
                     />
+                    <p className="weather-desc">{getSimpleWeatherDesc(h.weather[0].description)}</p>
                     <p>
                       {Math.round(h.main.temp)}
                       {unitSymbol}
@@ -253,6 +282,7 @@ export default function App() {
                       src={`https://openweathermap.org/img/wn/${d.icon}.png`}
                       alt=""
                     />
+                    <p className="weather-desc">{getSimpleWeatherDesc(d.weatherDesc)}</p>
                     <p>
                       {Math.round(d.max)}
                       {unitSymbol} / {Math.round(d.min)}
