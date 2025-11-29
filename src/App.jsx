@@ -269,7 +269,7 @@ export default function App() {
           <p>
             Made with care by <strong>Ayush Srivastava</strong> •
             srivastava999ayush@gmail.com
-          </p>
+          </p><br />
           <p className="disclaimer">
             Accuracy is not guaranteed. Weather dynamics introduce inherent
             unpredictability!!!
