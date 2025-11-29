@@ -14,6 +14,10 @@ export default function App() {
   const [unit, setUnit] = useState("metric");
   const [error, setError] = useState("");
   const [bgClass, setBgClass] = useState("clear");
+  const [popularCities] = useState([
+    "London", "New York", "Tokyo", "Paris", "Delhi", 
+    "Mumbai", "Sydney", "Dubai", "Singapore", "Toronto"
+  ]);
 
   const unitSymbol = unit === "metric" ? "°C" : "°F";
   const speedUnit = unit === "metric" ? "m/s" : "mph";
@@ -168,34 +172,84 @@ export default function App() {
 
   return (
     <div className={`weather-app ${bgClass}`}>
-      <div className="container">
-
-        <header className="header">
-          <h1 className="logo">SkyTemp</h1>
+      {/* Fixed Navbar */}
+      <nav className="navbar">
+        <div className="nav-container">
+          <h1 className="nav-logo">SkyTemp</h1>
           <button
             onClick={() =>
               setUnit((u) => (u === "metric" ? "imperial" : "metric"))
             }
-            className="unit-btn"
+            className="nav-unit-btn"
           >
             {unit === "metric" ? "°F" : "°C"}
           </button>
-        </header>
+        </div>
+      </nav>
 
+      <div className="container">
         <form onSubmit={handleSearch} className="search-bar">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search city..."
-          />
-          <button type="submit">Search</button>
-          <button type="button" onClick={getLocation}>
-            My Location
-          </button>
+          <div className="search-input-container">
+            <div className="search-icon">🔍</div>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Enter city name..."
+              disabled={loading}
+              className={loading ? 'search-loading' : ''}
+            />
+          </div>
+          <div className="search-buttons">
+            <button type="submit" disabled={loading}>
+              {loading ? 'Searching...' : 'Search'}
+            </button>
+            <button type="button" onClick={getLocation} disabled={loading}>
+              📍 My Location
+            </button>
+          </div>
         </form>
 
-        {loading && <div className="status">Loading...</div>}
-        {error && <div className="status error">{error}</div>}
+        {loading && (
+          <div className="loading-box">
+            <div className="loading-content">
+              <div className="loading-spinner"></div>
+              <div className="loading-text">
+                <h3>Searching Weather...</h3>
+                <p>Fetching latest weather data for {search}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="error-box">
+            <div className="error-content">
+              <div className="error-icon">⚠️</div>
+              <div className="error-text">
+                <h3>City Not Found</h3>
+                <p>We couldn't find weather data for "{search}"</p>
+              </div>
+            </div>
+            
+            <div className="error-suggestion">
+              <p>Try searching for one of these popular cities:</p>
+              <div className="suggestion-list">
+                {popularCities.slice(0, 4).map((city, index) => (
+                  <div 
+                    key={index}
+                    className="suggestion-chip"
+                    onClick={() => {
+                      setSearch(city);
+                      fetchAllData(city);
+                    }}
+                  >
+                    {city}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {weather && (
           <>
