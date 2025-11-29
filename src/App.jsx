@@ -1,0 +1,213 @@
+import React, { useEffect, useState } from "react";
+import "./App.css";
+
+const API_KEY = "171c829556b3a6f4a045d47d32ba0a8b";
+
+export default function App() {
+  const [city, setCity] = useState("Lucknow");
+  const [search, setSearch] = useState("");
+  const [weather, setWeather] = useState(null);
+  const [forecast, setForecast] = useState([]);
+  const [hourly, setHourly] = useState([]);
+  const [air, setAir] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [unit, setUnit] = useState("metric");
+  const [error, setError] = useState("");
+  const [bgClass, setBgClass] = useState("clear");
+
+  const unitSymbol = unit === "metric" ? "°C" : "°F";
+  const speedUnit = unit === "metric" ? "m/s" : "mph";
+
+  // AQI 0-500 calculation
+  const calculateAQI = (pm25) => {
+    if (pm25 <= 12.0) return Math.round((50 / 12.0) * pm25);
+    if (pm25 <= 35.4) return 50 + Math.round((50 / 23.4) * (pm25 - 12.1));
+    if (pm25 <= 55.4) return 100 + Math.round((50 / 19.9) * (pm25 - 35.5));
+    if (pm25 <= 150.4) return 150 + Math.round((50 / 94.9) * (pm25 - 55.5));
+    if (pm25 <= 250.4) return 200 + Math.round((100 / 99.9) * (pm25 - 150.5));
+    return 300 + Math.round((200 / 249.5) * (pm25 - 250.5));
+  };
+
+  const getAQIInfo = (aqi) => {
+    if (aqi <= 50) return { text: "Good", color: "#4ade80" };
+    if (aqi <= 100) return { text: "Moderate", color: "#facc15" };
+    if (aqi <= 150) return { text: "Unhealthy (Sensitive)", color: "#fb923c" };
+    if (aqi <= 200) return { text: "Unhealthy", color: "#ef4444" };
+    if (aqi <= 300) return { text: "Very Unhealthy", color: "#a855f7" };
+    return { text: "Hazardous", color: "#991b1b" };
+  };
+
+  const getWeatherBackground = (main) => {
+    const map = {
+      Clear: "clear",
+      Clouds: "clouds",
+      Rain: "rain",
+      Drizzle: "rain",
+      Thunderstorm: "thunder",
+      Snow: "snow",
+      Mist: "mist",
+      Fog: "mist",
+      Haze: "mist",
+    };
+    return map[main] || "clear";
+  };
+
+  const fetchAllData = async (query) => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const isCoords = query.includes("lat=");
+      const url = isCoords
+        ? `https://api.openweathermap.org/data/2.5/weather?${query}&appid=${API_KEY}&units=${unit}`
+        : `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${API_KEY}&units=${unit}`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("City not found");
+      const data = await res.json();
+
+      setWeather(data);
+      setCity(data.name);
+      setSearch("");
+      setBgClass(getWeatherBackground(data.weather[0].main));
+
+      // Forecast
+      const fRes = await fetch(
+        `https://api.openweathermap.org/data/2.5/forecast?lat=${data.coord.lat}&lon=${data.coord.lon}&appid=${API_KEY}&units=${unit}`
+      );
+      const fData = await fRes.json();
+      setHourly(fData.list.slice(0, 12));
+
+      const groups = {};
+      fData.list.forEach(item => {
+        const date = item.dt_txt.split(" ")[0];
+        groups[date] = groups[date] || [];
+        groups[date].push(item);
+      });
+
+      const daily = Object.values(groups).slice(0, 5).map(day => {
+        const temps = day.map(d => d.main.temp);
+        const mid = day[Math.floor(day.length / 2)];
+        return {
+          date: mid.dt,
+          max: Math.max(...temps),
+          min: Math.min(...temps),
+          icon: mid.weather[0].icon,
+        };
+      });
+      setForecast(daily);
+
+      // Air Quality
+      const airRes = await fetch(
+        `https://api.openweathermap.org/data/2.5/air_pollution?lat=${data.coord.lat}&lon=${data.coord.lon}&appid=${API_KEY}`
+      );
+      const airData = await airRes.json();
+      const realAQI = calculateAQI(airData.list[0].components.pm2_5);
+      setAir({ ...airData.list[0], realAQI });
+
+    } catch (err) {
+      setError("City not found or network issue");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllData("Lucknow");
+  }, [unit]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (search.trim()) fetchAllData(search);
+  };
+
+  const getLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      pos => fetchAllData(`lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`),
+      () => setError("Location access denied")
+    );
+  };
+
+  return (
+    <div className={`weather-app ${bgClass}`}>
+      <div className="container">
+
+        <header className="header">
+          <h1 className="logo">WeatherX</h1>
+          <button onClick={() => setUnit(u => u === "metric" ? "imperial" : "metric")} className="unit-btn">
+            {unit === "metric" ? "°F" : "°C"}
+          </button>
+        </header>
+
+        <form onSubmit={handleSearch} className="search-bar">
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search city..." />
+          <button type="submit">Search</button>
+          <button type="button" onClick={getLocation}>My Location</button>
+        </form>
+
+        {loading && <div className="status">Loading...</div>}
+        {error && <div className="status error">{error}</div>}
+
+        {weather && (
+          <>
+            <div className="current-card">
+              <img src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@4x.png`} alt="" />
+              <div className="info">
+                <h2>{city}</h2>
+                <h1>{Math.round(weather.main.temp)}{unitSymbol}</h1>
+                <p className="desc">{weather.weather[0].description}</p>
+                <div className="stats">
+                  <span>Humidity: {weather.main.humidity}%</span>
+                  <span>Wind: {weather.wind.speed} {speedUnit}</span>
+                  <span>Feels like: {Math.round(weather.main.feels_like)}{unitSymbol}</span>
+                </div>
+              </div>
+            </div>
+
+            {air && (
+              <div className="card aqi">
+                <h3>Air Quality Index</h3>
+                <div className="aqi-value" style={{ color: getAQIInfo(air.realAQI).color }}>
+                  {air.realAQI} <span>{getAQIInfo(air.realAQI).text}</span>
+                </div>
+                <p>PM2.5: {air.components.pm2_5.toFixed(1)} µg/m³</p>
+              </div>
+            )}
+
+            <div className="card">
+              <h3 className="section-title">Hourly Forecast</h3>
+              <div className="hourly-grid">
+                {hourly.map((h, i) => (
+                  <div key={i} className="h-item">
+                    <p>{new Date(h.dt * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                    <img src={`https://openweathermap.org/img/wn/${h.weather[0].icon}.png`} alt="" />
+                    <p>{Math.round(h.main.temp)}{unitSymbol}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="card">
+              <h3 className="section-title">5-Day Forecast</h3>
+              <div className="daily-grid">
+                {forecast.map((d, i) => (
+                  <div key={i} className="d-item">
+                    <p>{new Date(d.date * 1000).toLocaleDateString("en", { weekday: "short" })}</p>
+                    <img src={`https://openweathermap.org/img/wn/${d.icon}.png`} alt="" />
+                    <p>{Math.round(d.max)}{unitSymbol} / {Math.round(d.min)}{unitSymbol}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        <footer className="footer">
+          <p>Made with care by <strong>XYZ</strong> • xyz@example.com</p>
+          <p className="disclaimer">This app can make mistakes – weather is unpredictable!</p>
+        </footer>
+
+      </div>
+    </div>
+  );
+}

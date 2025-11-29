@@ -1,0 +1,337 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+}
+
+html, body, #root, .weather-app {
+  height: 100%; 
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+}
+
+.weather-app {
+  min-height: 100vh;
+  width: 100vw;
+  color: white;
+  position: relative;
+  transition: background 0.8s ease;
+}
+
+/* Weather-based backgrounds */
+.clear { 
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%); 
+}
+.clear::before { 
+  background: radial-gradient(circle at 70% 30%, rgba(251, 191, 36, 0.6), transparent 60%); 
+}
+
+.clouds { 
+  background: linear-gradient(135deg, #374151 0%, #6b7280 50%, #9ca3af 100%); 
+}
+.clouds::before { 
+  background: radial-gradient(circle at 50% 50%, rgba(156, 163, 175, 0.4), transparent 70%); 
+}
+
+.rain { 
+  background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%); 
+}
+.rain::before { 
+  background: radial-gradient(circle at 30% 70%, rgba(59, 130, 246, 0.5), transparent 60%); 
+}
+
+.thunder { 
+  background: linear-gradient(135deg, #18181b 0%, #27272a 50%, #3f3f46 100%); 
+}
+.thunder::before { 
+  background: radial-gradient(circle at 60% 40%, rgba(168, 85, 247, 0.6), transparent 50%); 
+}
+
+.snow { 
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 50%, #93c5fd 100%); 
+}
+.snow::before { 
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.5), transparent 70%); 
+}
+
+.mist { 
+  background: linear-gradient(135deg, #64748b 0%, #94a3b8 50%, #cbd5e1 100%); 
+}
+.mist::before { 
+  background: radial-gradient(circle at 40% 60%, rgba(203, 213, 225, 0.5), transparent 65%); 
+}
+
+.weather-app::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: background 0.8s ease;
+}
+
+.container {
+  width: 100vw;
+  min-height: 100vh;
+  padding: 2.5rem 5vw;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.header {
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  flex-wrap: wrap; 
+  gap: 1.5rem;
+}
+
+.logo {
+  font-size: clamp(3.5rem, 9vw, 7rem);
+  font-weight: 900;
+  background: linear-gradient(90deg, #f59e0b, #ef4444, #ec4899, #8b5cf6);
+  background-size: 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 10s linear infinite;
+}
+
+@keyframes shine { 
+  0% { background-position: 0%; } 
+  100% { background-position: 300%; } 
+}
+
+.unit-btn {
+  background: rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.6);
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: 0.4s;
+  color: white;
+}
+
+.unit-btn:hover { 
+  background: rgba(239, 68, 68, 0.6); 
+  transform: scale(1.08); 
+}
+
+/* Search */
+.search-bar {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-bar input {
+  flex: 1;
+  min-width: 280px;
+  padding: 1.4rem 2rem;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(245, 158, 11, 0.6);
+  color: white;
+  font-size: 1.1rem;
+  backdrop-filter: blur(15px);
+}
+
+.search-bar input::placeholder { 
+  color: rgba(255,255,255,0.7); 
+}
+
+.search-bar button {
+  padding: 1.4rem 2.8rem;
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  border: none;
+  border-radius: 50px;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.search-bar button:hover { 
+  transform: scale(1.05); 
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5); 
+}
+
+/* Status */
+.status { 
+  text-align: center; 
+  font-size: 1.5rem; 
+  padding: 2rem; 
+}
+
+.error { 
+  color: #ef4444; 
+}
+
+/* Cards */
+.current-card, .card {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(22px);
+  border-radius: 3rem;
+  padding: 3.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+}
+
+.current-card {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+}
+
+.current-card img { 
+  width: 240px; 
+}
+
+.info h2 { 
+  font-size: 3rem; 
+  font-weight: 700; 
+  margin-bottom: 0.5rem; 
+}
+
+.info h1 { 
+  font-size: 8.5rem; 
+  font-weight: 300; 
+  margin: 1rem 0; 
+}
+
+.desc { 
+  font-size: 2rem; 
+  opacity: 0.9; 
+  text-transform: capitalize; 
+}
+
+.stats {
+  display: flex;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.stats span {
+  background: rgba(245, 158, 11, 0.3);
+  padding: 1.2rem 2.2rem;
+  border-radius: 2rem;
+  font-size: 1.1rem;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+/* AQI Card */
+.aqi {
+  background: rgba(0,0,0,0.3);
+}
+
+.aqi h3 { 
+  font-size: 1.8rem; 
+  margin-bottom: 1.5rem; 
+}
+
+.aqi-value {
+  font-size: 4rem;
+  font-weight: 800;
+  margin: 1rem 0;
+}
+
+.aqi-value span {
+  font-size: 1.5rem;
+  margin-left: 1rem;
+  font-weight: 600;
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1.5rem;
+}
+
+/* Grids */
+.hourly-grid, .daily-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1.8rem;
+}
+
+.h-item, .d-item {
+  background: rgba(239, 68, 68, 0.2);
+  border-radius: 2rem;
+  padding: 1.8rem;
+  text-align: center;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  transition: 0.4s;
+}
+
+.h-item:hover, .d-item:hover {
+  transform: translateY(-15px);
+  background: rgba(239, 68, 68, 0.4);
+}
+
+.h-item img, .d-item img { 
+  width: 60px; 
+  margin: 0.5rem 0; 
+}
+
+/* Footer */
+.footer {
+  margin-top: auto;
+  padding: 3rem;
+  text-align: center;
+  background: rgba(245, 158, 11, 0.15);
+  border-radius: 2.5rem;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.footer p { 
+  margin: 0.8rem 0; 
+  font-size: 1rem; 
+  opacity: 0.9; 
+}
+
+.disclaimer { 
+  font-size: 0.9rem; 
+  opacity: 0.7; 
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .container { 
+    padding: 1.8rem; 
+  }
+  
+  .current-card { 
+    flex-direction: column; 
+    text-align: center; 
+    gap: 2rem; 
+  }
+  
+  .current-card img { 
+    width: 180px; 
+  }
+  
+  .info h1 { 
+    font-size: 6rem; 
+  }
+  
+  .search-bar { 
+    flex-direction: column; 
+  }
+  
+  .search-bar input { 
+    min-width: auto; 
+  }
+}
