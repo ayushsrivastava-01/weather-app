@@ -171,7 +171,7 @@ export default function App() {
       <div className="container">
 
         <header className="header">
-          <h1 className="logo">WeatherX</h1>
+          <h1 className="logo">SkyTemp</h1>
           <button
             onClick={() =>
               setUnit((u) => (u === "metric" ? "imperial" : "metric"))
