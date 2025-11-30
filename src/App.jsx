@@ -13,6 +13,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [unit, setUnit] = useState("metric");
   const [error, setError] = useState("");
+  const [isInstalled, setIsInstalled] = useState(false);
   const [bgClass, setBgClass] = useState("clear");
   const [popularCities] = useState([
     "Noida", "Bengaluru", "Indore", "Bhopal", "Delhi", 
@@ -43,6 +44,20 @@ export default function App() {
     }
   }, []);
 
+  // ✅ NEW: Check if app is already installed
+  useEffect(() => {
+    // Check if running in standalone mode (already installed)
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true);
+    }
+
+    // Listen for app installed event
+    window.addEventListener('appinstalled', () => {
+      setIsInstalled(true);
+      setShowInstallPrompt(false);
+    });
+  }, []);
+
   // Desktop Install Prompt Handler
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -57,10 +72,6 @@ export default function App() {
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', () => {
-      console.log('App installed successfully!');
-      setShowInstallPrompt(false);
-    });
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -190,6 +201,25 @@ export default function App() {
     return { level: levels[randomIndex], value: randomIndex + 1 };
   };
 
+  // ✅ UPDATED: Install handler with already installed check
+  const handleInstall = async () => {
+    if (isInstalled) {
+      alert('✅ SkyTemp is already installed on your device!');
+      setShowInstallPrompt(false);
+      return;
+    }
+
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+        setShowInstallPrompt(false);
+        setIsInstalled(true);
+      }
+    }
+  };
+
   const fetchAllData = async (query) => {
     try {
       setLoading(true);
@@ -283,18 +313,6 @@ export default function App() {
     );
   };
 
-  // Install handler
-  const handleInstall = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setDeferredPrompt(null);
-        setShowInstallPrompt(false);
-      }
-    }
-  };
-
   return (
     <div className={`weather-app ${bgClass} ${isDark ? 'dark-theme' : 'light-theme'}`}>
       {/* Fixed Navbar */}
@@ -317,11 +335,17 @@ export default function App() {
               {isDark ? '☀️' : '🌙'}
             </button>
             <button
-              onClick={() => setShowInstallPrompt(true)}
+              onClick={() => {
+                if (isInstalled) {
+                  alert('✅ SkyTemp is already installed on your device!');
+                } else {
+                  setShowInstallPrompt(true);
+                }
+              }}
               className="nav-btn"
-              title="Install App"
+              title={isInstalled ? 'Already Installed' : 'Install App'}
             >
-              📱
+              {isInstalled ? '✅' : '📱'}
             </button>
             <button
               onClick={() => setUnit((u) => (u === "metric" ? "imperial" : "metric"))}
@@ -355,24 +379,38 @@ export default function App() {
         </div>
       )}
 
-      {/* Install Prompt */}
+      {/* ✅ UPDATED: Install Prompt with already installed check */}
       {showInstallPrompt && (
         <div className="install-prompt-overlay">
           <div className="install-prompt">
             <div className="install-content">
-              <div className="install-icon">📱</div>
-              <h3>Install SkyTemp App</h3>
-              <p>Get the best weather experience with our app! Works on desktop and mobile.</p>
+              <div className="install-icon">
+                {isInstalled ? '✅' : '📱'}
+              </div>
+              <h3>
+                {isInstalled ? 'Already Installed!' : 'Install SkyTemp App'}
+              </h3>
+              <p>
+                {isInstalled 
+                  ? 'SkyTemp is already installed on your device. Enjoy the app! 🎉'
+                  : 'Get the best weather experience with our app! Works on desktop and mobile.'
+                }
+              </p>
               <div className="install-buttons">
-                <button onClick={handleInstall} className="install-btn">
-                  Install Now
-                </button>
                 <button 
-                  onClick={() => setShowInstallPrompt(false)} 
-                  className="install-cancel"
+                  onClick={handleInstall} 
+                  className="install-btn"
                 >
-                  Maybe Later
+                  {isInstalled ? 'Awesome! 🎉' : 'Install Now'}
                 </button>
+                {!isInstalled && (
+                  <button 
+                    onClick={() => setShowInstallPrompt(false)} 
+                    className="install-cancel"
+                  >
+                    Maybe Later
+                  </button>
+                )}
               </div>
             </div>
           </div>
