@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 
-
 const API_KEY = "171c829556b3a6f4a045d47d32ba0a8b";
 
 export default function App() {
@@ -20,22 +19,56 @@ export default function App() {
     "Mumbai", "Sydney", "Dubai", "Singapore", "Toronto"
   ]);
 
+  // ✅ NEW: Desktop PWA Install State
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
+
   useEffect(() => {
-  console.log('📱 Checking service worker...');
-  
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('🎉 Service Worker registered!', registration);
-        console.log('Scope:', registration.scope);
-      })
-      .catch((error) => {
-        console.log('❌ Service Worker registration failed:', error);
-      });
-  } else {
-    console.log('❌ Service Worker not supported');
-  }
-}, []);
+    console.log('📱 Checking service worker...');
+    
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          console.log('🎉 Service Worker registered!', registration);
+        })
+        .catch((error) => {
+          console.log('❌ Service Worker registration failed:', error);
+        });
+    }
+  }, []);
+
+  // ✅ NEW: Desktop Install Prompt Handler
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      
+      // Show prompt after user interacts (searches or clicks location)
+      if (userInteracted) {
+        setTimeout(() => {
+          setShowInstallPrompt(true);
+        }, 2000);
+      }
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', () => {
+      console.log('App installed successfully!');
+      setShowInstallPrompt(false);
+    });
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, [userInteracted]);
+
+  // ✅ NEW: Track user interaction
+  const handleUserInteraction = () => {
+    if (!userInteracted) {
+      setUserInteracted(true);
+    }
+  };
 
   const unitSymbol = unit === "metric" ? "°C" : "°F";
   const speedUnit = unit === "metric" ? "m/s" : "mph";
@@ -107,6 +140,9 @@ export default function App() {
       setLoading(true);
       setError("");
 
+      // ✅ Track user interaction
+      handleUserInteraction();
+
       const isCoords = query.includes("lat=");
 
       const url = isCoords
@@ -175,10 +211,14 @@ export default function App() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (search.trim()) fetchAllData(search);
+    if (search.trim()) {
+      handleUserInteraction(); // ✅ Track search
+      fetchAllData(search);
+    }
   };
 
   const getLocation = () => {
+    handleUserInteraction(); // ✅ Track location click
     navigator.geolocation.getCurrentPosition(
       (pos) =>
         fetchAllData(
@@ -186,6 +226,18 @@ export default function App() {
         ),
       () => setError("Location access denied")
     );
+  };
+
+  // ✅ NEW: Install handler
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+        setShowInstallPrompt(false);
+      }
+    }
   };
 
   return (
@@ -204,6 +256,30 @@ export default function App() {
           </button>
         </div>
       </nav>
+
+      {/* ✅ NEW: Install Prompt */}
+      {showInstallPrompt && (
+        <div className="install-prompt-overlay">
+          <div className="install-prompt">
+            <div className="install-content">
+              <div className="install-icon">📱</div>
+              <h3>Install SkyTemp App</h3>
+              <p>Get the best weather experience with our app! Works on desktop and mobile.</p>
+              <div className="install-buttons">
+                <button onClick={handleInstall} className="install-btn">
+                  Install Now
+                </button>
+                <button 
+                  onClick={() => setShowInstallPrompt(false)} 
+                  className="install-cancel"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="container">
         <form onSubmit={handleSearch} className="search-bar">
@@ -368,28 +444,28 @@ export default function App() {
         )}
 
         <footer className="footer">
-  <div className="footer-content">
-    <p>
-      Made with care by <strong>Ayush Srivastava</strong>
-    </p>
-    <p className="email-cta">
-      Drop me an email for your suggestions
-    </p>
-    <div className="contact-info">
-      <a 
-        href="mailto:srivastava999ayush@gmail.com?subject=Weather%20App%20Feedback&body=Hi%20Ayush,%20I%20have%20a%20suggestion%20for%20your%20weather%20app:" 
-        className="email-link"
-      >
-        <span className="email-icon">📧</span>
-        srivastava999ayush@gmail.com
-      </a>
-    </div>
-    <p className="disclaimer">
-      Accuracy is not guaranteed. Weather dynamics introduce inherent
-      unpredictability!!!
-    </p>
-  </div>
-</footer>
+          <div className="footer-content">
+            <p>
+              Made with care by <strong>Ayush Srivastava</strong>
+            </p>
+            <p className="email-cta">
+              Drop me an email for your suggestions
+            </p>
+            <div className="contact-info">
+              <a 
+                href="mailto:srivastava999ayush@gmail.com?subject=Weather%20App%20Feedback&body=Hi%20Ayush,%20I%20have%20a%20suggestion%20for%20your%20weather%20app:" 
+                className="email-link"
+              >
+                <span className="email-icon">📧</span>
+                srivastava999ayush@gmail.com
+              </a>
+            </div>
+            <p className="disclaimer">
+              Accuracy is not guaranteed. Weather dynamics introduce inherent
+              unpredictability!!!
+            </p>
+          </div>
+        </footer>
       </div>
     </div>
   );
