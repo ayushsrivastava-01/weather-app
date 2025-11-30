@@ -231,7 +231,7 @@ export default function App() {
     return { level: levels[randomIndex], value: randomIndex + 1 };
   };
 
-  // ✅ FIXED: Simple install handler
+  // ✅ FIXED: Enhanced install handler with better detection
   const handleInstall = async () => {
     console.log('🔄 Install clicked');
     
@@ -248,15 +248,24 @@ export default function App() {
     }
 
     if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setDeferredPrompt(null);
-        setShowInstallPrompt(false);
-        setIsInstalled(true);
+      try {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          setDeferredPrompt(null);
+          setShowInstallPrompt(false);
+          setIsInstalled(true);
+        }
+      } catch (error) {
+        console.error('Install prompt error:', error);
       }
     } else {
-      alert('⚠️ Install feature not available in this browser.');
+      // Show already installed message if prompt not available but app is installed
+      if (isInstalled) {
+        setShowAlreadyInstalled(true);
+      } else {
+        alert('⚠️ Install feature not available in this browser.');
+      }
     }
   };
 
@@ -379,7 +388,7 @@ export default function App() {
                 const isCurrentlyInstalled = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
                 
                 if (isCurrentlyInstalled) {
-                  setShowAlreadyInstalled(true); // Show UI message
+                  setShowAlreadyInstalled(true);
                 } else {
                   setShowInstallPrompt(true);
                 }
@@ -445,7 +454,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ✅ NEW: Already Installed Message */}
+      {/* ✅ Already Installed Message */}
       {showAlreadyInstalled && (
         <div className="install-prompt-overlay">
           <div className="install-prompt already-installed-prompt">
