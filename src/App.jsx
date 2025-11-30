@@ -45,51 +45,87 @@ export default function App() {
     }
   }, []);
 
-  // ✅ ENHANCED: Check if app is already installed
-  useEffect(() => {
-    console.log('🔍 Checking installation status...');
-    
-    // Multiple methods to detect installation
-    const checkInstalled = () => {
-      return (
-        window.matchMedia('(display-mode: standalone)').matches ||
-        navigator.standalone ||
-        window.location.search.includes('installed=true')
-      );
-    };
-
-    if (checkInstalled()) {
-      console.log('✅ App is already installed');
-      setIsInstalled(true);
+  // ✅ ENHANCED: Comprehensive installed detection
+useEffect(() => {
+  console.log('🔍 Comprehensive installation check started...');
+  
+  const checkAllInstallationMethods = () => {
+    // Method 1: Display mode check
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      console.log('✅ Detected: display-mode standalone');
+      return true;
     }
+    
+    // Method 2: Navigator standalone (iOS)
+    if (navigator.standalone) {
+      console.log('✅ Detected: navigator.standalone');
+      return true;
+    }
+    
+    // Method 3: Check if launched from home screen
+    if (window.navigator.standalone) {
+      console.log('✅ Detected: window.navigator.standalone');
+      return true;
+    }
+    
+    // Method 4: Check referrer for mobile apps
+    if (document.referrer.includes('android-app://')) {
+      console.log('✅ Detected: android-app referrer');
+      return true;
+    }
+    
+    // Method 5: Check for specific PWA indicators
+    if (window.location.search.includes('source=pwa') || 
+        window.location.search.includes('installed=true')) {
+      console.log('✅ Detected: URL parameters indicate PWA');
+      return true;
+    }
+    
+    // Method 6: Check if service worker is controlling the page
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      console.log('ℹ️ Service Worker is controlling the page');
+    }
+    
+    console.log('❌ No installation detected');
+    return false;
+  };
 
-    // Listen for new installations
-    window.addEventListener('appinstalled', () => {
-      console.log('🎉 App installed event received');
-      setIsInstalled(true);
-      setShowInstallPrompt(false);
-    });
-  }, []);
+  // Run the check
+  const isAppInstalled = checkAllInstallationMethods();
+  console.log('📊 Final installation status:', isAppInstalled);
+  
+  if (isAppInstalled) {
+    setIsInstalled(true);
+  }
 
-  // Desktop Install Prompt Handler
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      
-      if (userInteracted) {
-        setTimeout(() => {
-          setShowInstallPrompt(true);
-        }, 2000);
-      }
-    };
+  // Listen for future installations
+  window.addEventListener('appinstalled', (evt) => {
+    console.log('🎉 App installed event fired!', evt);
+    setIsInstalled(true);
+    setShowInstallPrompt(false);
+  });
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+}, []);
 
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, [userInteracted]);
+// Desktop Install Prompt Handler
+useEffect(() => {
+  const handleBeforeInstallPrompt = (e) => {
+    e.preventDefault();
+    setDeferredPrompt(e);
+    
+    if (userInteracted) {
+      setTimeout(() => {
+        setShowInstallPrompt(true);
+      }, 2000);
+    }
+  };
+
+  window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+  return () => {
+    window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  };
+}, [userInteracted]);
 
   // Track user interaction
   const handleUserInteraction = () => {
