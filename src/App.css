@@ -692,57 +692,219 @@ html, body, #root, .weather-app {
   height: 50px;
   margin: 0.3rem 0; 
 }
-
 /* Footer */
 .footer {
   margin-top: auto;
-  padding: 2rem;
+  padding: 2.5rem 2rem;
   text-align: center;
-  background: rgba(0, 0, 0, 0.3); 
-  border-radius: 1.5rem;
-  border: 1px solid rgba(86, 171, 47, 0.3); 
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.9) 100%);
+  border-radius: 2rem;
+  border: 1px solid rgba(86, 171, 47, 0.4);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .footer::before {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(60deg, rgba(86, 171, 47, 0.1) 0%, transparent 50%, rgba(86, 171, 47, 0.1) 100%);
-    transform: rotate(45deg);
-    animation: flow 10s linear infinite;
-    pointer-events: none;
-    opacity: 0.5;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(86, 171, 47, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(56, 239, 125, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+  animation: float 6s ease-in-out infinite;
+  pointer-events: none;
 }
 
-@keyframes flow {
-    0% { transform: translate(-50%, -50%) rotate(45deg); }
-    100% { transform: translate(50%, 50%) rotate(45deg); }
+.footer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(86, 171, 47, 0.1),
+    rgba(56, 239, 125, 0.05),
+    transparent
+  );
+  animation: shimmer 8s linear infinite;
+  pointer-events: none;
+}
+
+.footer-content {
+  position: relative;
+  z-index: 2;
 }
 
 .footer p { 
   margin: 0.5rem 0; 
-  font-size: 0.9rem; 
-  opacity: 0.9; 
+  font-size: 0.95rem; 
+  color: rgba(255, 255, 255, 0.9);
   position: relative;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .footer strong {
-    background: linear-gradient(90deg, #56ab2f, #38ef7d); 
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 700;
+  background: linear-gradient(135deg, #56ab2f, #a8e063, #38ef7d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  font-size: 1.1rem;
+  position: relative;
+  display: inline-block;
+}
+
+.footer strong::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #56ab2f, #38ef7d);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.footer:hover strong::after {
+  transform: scaleX(1);
+}
+
+.contact-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.email-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: rgba(86, 171, 47, 0.2);
+  border: 1px solid rgba(86, 171, 47, 0.4);
+  border-radius: 50px;
+  color: #a8e063;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.email-link:hover {
+  background: rgba(86, 171, 47, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(86, 171, 47, 0.3);
+  color: #38ef7d;
+}
+
+.email-icon {
+  font-size: 1.1rem;
 }
 
 .disclaimer { 
-  font-size: 0.8rem; 
-  opacity: 0.6; 
-  margin-top: 1rem;
+  font-size: 0.85rem; 
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 1.5rem;
+  padding: 1.2rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 1rem;
+  border-left: 3px solid rgba(86, 171, 47, 0.5);
+  font-style: italic;
+  position: relative;
+  line-height: 1.5;
+}
+
+.disclaimer::before {
+  content: "💡";
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.email-cta {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.8rem;
+  font-weight: 500;
+}
+
+.email-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  background: linear-gradient(135deg, rgba(86, 171, 47, 0.25) 0%, rgba(56, 239, 125, 0.2) 100%);
+  border: 1px solid rgba(86, 171, 47, 0.5);
+  border-radius: 50px;
+  color: #a8e063;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.email-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2), 
+    transparent);
+  transition: left 0.5s;
+}
+
+.email-link:hover::before {
+  left: 100%;
+}
+
+.email-link:hover {
+  background: linear-gradient(135deg, rgba(86, 171, 47, 0.35) 0%, rgba(56, 239, 125, 0.3) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(86, 171, 47, 0.4);
+  color: #38ef7d;
+  border-color: rgba(86, 171, 47, 0.7);
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 /* Mobile Responsive */
@@ -938,6 +1100,40 @@ html, body, #root, .weather-app {
   .stats span {
     background: rgba(86, 171, 47, 0.3) !important;
     border: 1px solid rgba(86, 171, 47, 0.5) !important;
+  }
+  .footer {
+    padding: 2rem 1.5rem;
+    border-radius: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .footer p {
+    font-size: 0.9rem;
+  }
+
+  .footer strong {
+    font-size: 1rem;
+  }
+
+  .contact-info {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .email-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .disclaimer {
+    font-size: 0.8rem;
+    padding: 1rem 1rem 1rem 3rem;
+    text-align: left;
+    margin-top: 1.2rem;
+  }
+
+  .disclaimer::before {
+    left: 1rem;
   }
 }
 

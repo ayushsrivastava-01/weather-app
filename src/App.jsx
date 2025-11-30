@@ -350,15 +350,28 @@ export default function App() {
         )}
 
         <footer className="footer">
-          <p>
-            Made with care by <strong>Ayush Srivastava</strong> •
-            srivastava999ayush@gmail.com
-          </p><br />
-          <p className="disclaimer">
-            Accuracy is not guaranteed. Weather dynamics introduce inherent
-            unpredictability!!!
-          </p>
-        </footer>
+  <div className="footer-content">
+    <p>
+      Made with care by <strong>Ayush Srivastava</strong>
+    </p>
+    <p className="email-cta">
+      Drop me an email for your suggestions
+    </p>
+    <div className="contact-info">
+      <a 
+        href="mailto:srivastava999ayush@gmail.com?subject=Weather%20App%20Feedback&body=Hi%20Ayush,%20I%20have%20a%20suggestion%20for%20your%20weather%20app:" 
+        className="email-link"
+      >
+        <span className="email-icon">📧</span>
+        srivastava999ayush@gmail.com
+      </a>
+    </div>
+    <p className="disclaimer">
+      Accuracy is not guaranteed. Weather dynamics introduce inherent
+      unpredictability!!!
+    </p>
+  </div>
+</footer>
       </div>
     </div>
   );
