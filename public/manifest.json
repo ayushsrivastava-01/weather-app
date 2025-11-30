@@ -1,37 +1,48 @@
 {
   "name": "SkyTemp Weather",
   "short_name": "SkyTemp",
-  "description": "Beautiful weather app with forecasts and air quality",
+  "description": "Advanced weather app with forecasts, air quality, and favorites",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1e3c72",
   "theme_color": "#56ab2f",
   "orientation": "any",
-  "categories": ["weather", "productivity"],
+  "categories": ["weather", "productivity", "utilities"],
   "icons": [
     {
       "src": "/weather_icon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/weather_icon.png", 
+      "src": "/weather_icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "screenshots": [
     {
-      "src": "/screenshot-mobile.png",
-      "sizes": "375x667",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/screenshot-desktop.png", 
+      "src": "/screenshot-desktop.png",
       "sizes": "1280x720",
       "type": "image/png",
-      "form_factor": "wide"
+      "form_factor": "wide",
+      "label": "SkyTemp Desktop App"
+    },
+    {
+      "src": "/screenshot-mobile.png", 
+      "sizes": "375x667",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "SkyTemp Mobile App"
     }
+  ],
+  "features": [
+    "Weather forecasts",
+    "Air quality index", 
+    "Favorite locations",
+    "Dark/Light theme",
+    "Offline functionality"
   ]
 }

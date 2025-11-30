@@ -19,18 +19,23 @@ export default function App() {
     "Mumbai", "Sydney", "Dubai", "Singapore", "Toronto"
   ]);
 
-  // ✅ NEW: Desktop PWA Install State
+  // ✅ NEW: Advanced Features State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
+  const [isDark, setIsDark] = useState(true);
+  const [favorites, setFavorites] = useState([]);
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [uvIndex, setUvIndex] = useState(null);
 
+  // Service Worker Registration
   useEffect(() => {
     console.log('📱 Checking service worker...');
     
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then((registration) => {
-          console.log('🎉 Service Worker registered!', registration);
+          console.log('🎉 Service Worker registered!');
         })
         .catch((error) => {
           console.log('❌ Service Worker registration failed:', error);
@@ -38,13 +43,12 @@ export default function App() {
     }
   }, []);
 
-  // ✅ NEW: Desktop Install Prompt Handler
+  // Desktop Install Prompt Handler
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
       
-      // Show prompt after user interacts (searches or clicks location)
       if (userInteracted) {
         setTimeout(() => {
           setShowInstallPrompt(true);
@@ -63,17 +67,30 @@ export default function App() {
     };
   }, [userInteracted]);
 
-  // ✅ NEW: Track user interaction
+  // Track user interaction
   const handleUserInteraction = () => {
     if (!userInteracted) {
       setUserInteracted(true);
     }
   };
 
+  // Load favorites from localStorage
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem('weatherFavorites');
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
+  }, []);
+
+  // Save favorites to localStorage
+  useEffect(() => {
+    localStorage.setItem('weatherFavorites', JSON.stringify(favorites));
+  }, [favorites]);
+
   const unitSymbol = unit === "metric" ? "°C" : "°F";
   const speedUnit = unit === "metric" ? "m/s" : "mph";
 
-  // Simple weather descriptions for better user understanding
+  // Simple weather descriptions
   const getSimpleWeatherDesc = (description) => {
     const desc = description.toLowerCase();
     if (desc.includes('clear')) return 'Sunny';
@@ -87,13 +104,13 @@ export default function App() {
     return 'Clear';
   };
 
-  // Check if it's currently day time based on sunrise and sunset
+  // Check if it's currently day time
   const isDayTime = (sunrise, sunset) => {
     const currentTime = Math.floor(Date.now() / 1000);
     return currentTime > sunrise && currentTime < sunset;
   };
 
-  // Round time into blocks like 6:00, 9:00, 12:00
+  // Round time into blocks
   const roundTime = (timestamp) => {
     const d = new Date(timestamp * 1000);
     let hour = d.getHours();
@@ -135,12 +152,49 @@ export default function App() {
     return map[main] || "clear";
   };
 
+  // ✅ NEW: Add to favorites
+  const addToFavorites = () => {
+    if (weather && !favorites.includes(city)) {
+      setFavorites([...favorites, city]);
+    }
+  };
+
+  // ✅ NEW: Remove from favorites
+  const removeFromFavorites = (cityToRemove) => {
+    setFavorites(favorites.filter(fav => fav !== cityToRemove));
+  };
+
+  // ✅ NEW: Share weather
+  const shareWeather = async () => {
+    if (weather) {
+      const shareData = {
+        title: `Weather in ${city}`,
+        text: `It's ${Math.round(weather.main.temp)}${unitSymbol} and ${weather.weather[0].description} in ${city}. Check it out!`,
+        url: window.location.href
+      };
+      
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+        alert('Weather info copied to clipboard!');
+      }
+    }
+  };
+
+  // ✅ NEW: Get UV Index (mock data for now)
+  const getUVIndex = () => {
+    const levels = ['Low', 'Moderate', 'High', 'Very High', 'Extreme'];
+    const randomIndex = Math.floor(Math.random() * 5);
+    return { level: levels[randomIndex], value: randomIndex + 1 };
+  };
+
   const fetchAllData = async (query) => {
     try {
       setLoading(true);
       setError("");
 
-      // ✅ Track user interaction
       handleUserInteraction();
 
       const isCoords = query.includes("lat=");
@@ -158,6 +212,7 @@ export default function App() {
       setCity(data.name);
       setSearch("");
       setBgClass(getWeatherBackground(data.weather[0].main));
+      setUvIndex(getUVIndex());
 
       // Forecast (6 days)
       const fRes = await fetch(
@@ -212,13 +267,13 @@ export default function App() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (search.trim()) {
-      handleUserInteraction(); // ✅ Track search
+      handleUserInteraction();
       fetchAllData(search);
     }
   };
 
   const getLocation = () => {
-    handleUserInteraction(); // ✅ Track location click
+    handleUserInteraction();
     navigator.geolocation.getCurrentPosition(
       (pos) =>
         fetchAllData(
@@ -228,7 +283,7 @@ export default function App() {
     );
   };
 
-  // ✅ NEW: Install handler
+  // Install handler
   const handleInstall = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
@@ -241,23 +296,66 @@ export default function App() {
   };
 
   return (
-    <div className={`weather-app ${bgClass}`}>
+    <div className={`weather-app ${bgClass} ${isDark ? 'dark-theme' : 'light-theme'}`}>
       {/* Fixed Navbar */}
       <nav className="navbar">
         <div className="nav-container">
           <h1 className="nav-logo">SkyTemp</h1>
-          <button
-            onClick={() =>
-              setUnit((u) => (u === "metric" ? "imperial" : "metric"))
-            }
-            className="nav-unit-btn"
-          >
-            {unit === "metric" ? "°F" : "°C"}
-          </button>
+          <div className="nav-controls">
+            <button
+              onClick={() => setShowFavorites(!showFavorites)}
+              className="nav-btn"
+              title="Favorites"
+            >
+              ⭐
+            </button>
+            <button
+              onClick={() => setIsDark(!isDark)}
+              className="nav-btn"
+              title={isDark ? 'Light Mode' : 'Dark Mode'}
+            >
+              {isDark ? '☀️' : '🌙'}
+            </button>
+            <button
+              onClick={() => setShowInstallPrompt(true)}
+              className="nav-btn"
+              title="Install App"
+            >
+              📱
+            </button>
+            <button
+              onClick={() => setUnit((u) => (u === "metric" ? "imperial" : "metric"))}
+              className="nav-unit-btn"
+            >
+              {unit === "metric" ? "°F" : "°C"}
+            </button>
+          </div>
         </div>
       </nav>
 
-      {/* ✅ NEW: Install Prompt */}
+      {/* Favorites Panel */}
+      {showFavorites && (
+        <div className="favorites-panel">
+          <div className="favorites-header">
+            <h3>Favorite Cities</h3>
+            <button onClick={() => setShowFavorites(false)}>✕</button>
+          </div>
+          <div className="favorites-list">
+            {favorites.length === 0 ? (
+              <p className="no-favorites">No favorites yet</p>
+            ) : (
+              favorites.map((favCity, index) => (
+                <div key={index} className="favorite-item">
+                  <span onClick={() => fetchAllData(favCity)}>{favCity}</span>
+                  <button onClick={() => removeFromFavorites(favCity)}>🗑️</button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Install Prompt */}
       {showInstallPrompt && (
         <div className="install-prompt-overlay">
           <div className="install-prompt">
@@ -348,10 +446,29 @@ export default function App() {
         {weather && (
           <>
             <div className="current-card">
-              <img
-                src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@4x.png`}
-                alt=""
-              />
+              <div className="weather-header">
+                <img
+                  src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@4x.png`}
+                  alt=""
+                />
+                <div className="weather-actions">
+                  <button 
+                    onClick={addToFavorites}
+                    disabled={favorites.includes(city)}
+                    className="action-btn"
+                    title="Add to favorites"
+                  >
+                    {favorites.includes(city) ? '⭐ Added' : '⭐ Add'}
+                  </button>
+                  <button 
+                    onClick={shareWeather}
+                    className="action-btn"
+                    title="Share weather"
+                  >
+                    📤 Share
+                  </button>
+                </div>
+              </div>
 
               <div className="info">
                 <div className="location-time">
@@ -377,26 +494,55 @@ export default function App() {
                     Feels like: {Math.round(weather.main.feels_like)}
                     {unitSymbol}
                   </span>
+                  {uvIndex && (
+                    <span>
+                      UV Index: {uvIndex.value} ({uvIndex.level})
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
 
-            {air && (
-              <div className="card aqi">
-                <h3>Air Quality Index</h3>
-                <div
-                  className="aqi-value"
-                  style={{ color: getAQIInfo(air.realAQI).color }}
-                >
-                  {air.realAQI} <span>{getAQIInfo(air.realAQI).text}</span>
+            <div className="cards-grid">
+              {air && (
+                <div className="card aqi">
+                  <h3>🌫️ Air Quality</h3>
+                  <div
+                    className="aqi-value"
+                    style={{ color: getAQIInfo(air.realAQI).color }}
+                  >
+                    {air.realAQI} <span>{getAQIInfo(air.realAQI).text}</span>
+                  </div>
+                  <p>PM2.5: {air.components.pm2_5.toFixed(1)} µg/m³</p>
                 </div>
-                <p>PM2.5: {air.components.pm2_5.toFixed(1)} µg/m³</p>
+              )}
+
+              <div className="card extra-info">
+                <h3>📊 Details</h3>
+                <div className="extra-stats">
+                  <div className="stat-item">
+                    <span>Pressure</span>
+                    <span>{weather.main.pressure} hPa</span>
+                  </div>
+                  <div className="stat-item">
+                    <span>Visibility</span>
+                    <span>{(weather.visibility / 1000).toFixed(1)} km</span>
+                  </div>
+                  <div className="stat-item">
+                    <span>Sunrise</span>
+                    <span>{new Date(weather.sys.sunrise * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                  </div>
+                  <div className="stat-item">
+                    <span>Sunset</span>
+                    <span>{new Date(weather.sys.sunset * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
 
             {/* Hourly */}
             <div className="card">
-              <h3 className="section-title">Hourly Forecast</h3>
+              <h3 className="section-title">🕒 Hourly Forecast</h3>
               <div className="hourly-grid">
                 {hourly.map((h, i) => (
                   <div key={i} className="h-item">
@@ -417,7 +563,7 @@ export default function App() {
 
             {/* 6 Days */}
             <div className="card">
-              <h3 className="section-title">6-Day Forecast</h3>
+              <h3 className="section-title">📅 6-Day Forecast</h3>
               <div className="daily-grid">
                 {forecast.map((d, i) => (
                   <div key={i} className="d-item">
