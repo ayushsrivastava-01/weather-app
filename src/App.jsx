@@ -1,22 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 
-useEffect(() => {
-  console.log('📱 Checking service worker...');
-  
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('🎉 Service Worker registered!', registration);
-        console.log('Scope:', registration.scope);
-      })
-      .catch((error) => {
-        console.log('❌ Service Worker registration failed:', error);
-      });
-  } else {
-    console.log('❌ Service Worker not supported');
-  }
-}, []);
+
 const API_KEY = "171c829556b3a6f4a045d47d32ba0a8b";
 
 export default function App() {
@@ -34,6 +19,23 @@ export default function App() {
     "Noida", "Bengaluru", "Indore", "Bhopal", "Delhi", 
     "Mumbai", "Sydney", "Dubai", "Singapore", "Toronto"
   ]);
+
+  useEffect(() => {
+  console.log('📱 Checking service worker...');
+  
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('🎉 Service Worker registered!', registration);
+        console.log('Scope:', registration.scope);
+      })
+      .catch((error) => {
+        console.log('❌ Service Worker registration failed:', error);
+      });
+  } else {
+    console.log('❌ Service Worker not supported');
+  }
+}, []);
 
   const unitSymbol = unit === "metric" ? "°C" : "°F";
   const speedUnit = unit === "metric" ? "m/s" : "mph";
