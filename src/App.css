@@ -1860,3 +1860,68 @@ html, body, #root, .weather-app {
     justify-content: center;
   }
 }
+
+/* ✅ Favorites Text Color */
+.favorite-item span {
+  cursor: pointer;
+  flex: 1;
+  font-weight: 500;
+  color: #a8e063 !important; /* Eye catching green color */
+  transition: color 0.3s ease;
+}
+
+.favorite-item:hover span {
+  color: #38ef7d !important; /* Brighter green on hover */
+}
+
+.favorite-item span:hover {
+  color: #56ab2f !important; /* Different shade on text hover */
+}
+
+/* ✅ Light Mode Text Colors */
+.light-theme .action-btn {
+  color: #1e293b !important; /* Dark text for buttons */
+  border: 1px solid rgba(30, 41, 59, 0.3) !important;
+}
+
+.light-theme .stat-item span:first-child {
+  color: #475569 !important; /* Dark gray for labels */
+  font-weight: 600;
+}
+
+.light-theme .stat-item span:last-child {
+  color: #1e293b !important; /* Dark text for values */
+  font-weight: 700;
+}
+
+.light-theme .weather-actions .action-btn:hover:not(:disabled) {
+  background: rgba(86, 171, 47, 0.3) !important;
+  color: #1e293b !important;
+}
+
+/* ✅ Ensure favorite cities are visible in light mode */
+.light-theme .favorite-item span {
+  color: #059669 !important; /* Darker green for light mode */
+}
+
+.light-theme .favorite-item:hover span {
+  color: #047857 !important; /* Even darker on hover */
+}
+
+.light-theme .favorites-panel {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(86, 171, 47, 0.4) !important;
+}
+
+.light-theme .favorite-item {
+  background: rgba(86, 171, 47, 0.1) !important;
+  border: 1px solid rgba(86, 171, 47, 0.3) !important;
+}
+
+.light-theme .favorite-item:hover {
+  background: rgba(86, 171, 47, 0.2) !important;
+}
+
+.light-theme .favorites-header h3 {
+  color: #059669 !important;
+}
