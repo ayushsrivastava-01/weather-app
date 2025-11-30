@@ -45,87 +45,68 @@ export default function App() {
     }
   }, []);
 
-  // ✅ ENHANCED: Comprehensive installed detection
-useEffect(() => {
-  console.log('🔍 Comprehensive installation check started...');
-  
-  const checkAllInstallationMethods = () => {
-    // Method 1: Display mode check
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      console.log('✅ Detected: display-mode standalone');
-      return true;
-    }
+  // ✅ FIXED: Simple and reliable installed detection
+  useEffect(() => {
+    console.log('🔍 Checking if app is installed...');
     
-    // Method 2: Navigator standalone (iOS)
-    if (navigator.standalone) {
-      console.log('✅ Detected: navigator.standalone');
-      return true;
-    }
-    
-    // Method 3: Check if launched from home screen
-    if (window.navigator.standalone) {
-      console.log('✅ Detected: window.navigator.standalone');
-      return true;
-    }
-    
-    // Method 4: Check referrer for mobile apps
-    if (document.referrer.includes('android-app://')) {
-      console.log('✅ Detected: android-app referrer');
-      return true;
-    }
-    
-    // Method 5: Check for specific PWA indicators
-    if (window.location.search.includes('source=pwa') || 
-        window.location.search.includes('installed=true')) {
-      console.log('✅ Detected: URL parameters indicate PWA');
-      return true;
-    }
-    
-    // Method 6: Check if service worker is controlling the page
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-      console.log('ℹ️ Service Worker is controlling the page');
-    }
-    
-    console.log('❌ No installation detected');
-    return false;
-  };
+    const checkInstalled = () => {
+      // Desktop PWA and Mobile PWA
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('✅ Detected: PWA standalone mode');
+        return true;
+      }
+      
+      // iOS PWA
+      if (navigator.standalone) {
+        console.log('✅ Detected: iOS PWA');
+        return true;
+      }
+      
+      return false;
+    };
 
-  // Run the check
-  const isAppInstalled = checkAllInstallationMethods();
-  console.log('📊 Final installation status:', isAppInstalled);
-  
-  if (isAppInstalled) {
-    setIsInstalled(true);
-  }
-
-  // Listen for future installations
-  window.addEventListener('appinstalled', (evt) => {
-    console.log('🎉 App installed event fired!', evt);
-    setIsInstalled(true);
-    setShowInstallPrompt(false);
-  });
-
-}, []);
-
-// Desktop Install Prompt Handler
-useEffect(() => {
-  const handleBeforeInstallPrompt = (e) => {
-    e.preventDefault();
-    setDeferredPrompt(e);
-    
-    if (userInteracted) {
-      setTimeout(() => {
-        setShowInstallPrompt(true);
-      }, 2000);
+    // Check immediately
+    if (checkInstalled()) {
+      console.log('✅ App is installed');
+      setIsInstalled(true);
     }
-  };
 
-  window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    // Also check after a delay (for mobile)
+    setTimeout(() => {
+      if (checkInstalled() && !isInstalled) {
+        console.log('✅ App is installed (delayed check)');
+        setIsInstalled(true);
+      }
+    }, 1000);
 
-  return () => {
-    window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-  };
-}, [userInteracted]);
+    // Listen for new installations
+    window.addEventListener('appinstalled', () => {
+      console.log('🎉 App installed event received');
+      setIsInstalled(true);
+      setShowInstallPrompt(false);
+    });
+
+  }, []);
+
+  // Desktop Install Prompt Handler
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      
+      if (userInteracted) {
+        setTimeout(() => {
+          setShowInstallPrompt(true);
+        }, 2000);
+      }
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, [userInteracted]);
 
   // Track user interaction
   const handleUserInteraction = () => {
@@ -250,15 +231,17 @@ useEffect(() => {
     return { level: levels[randomIndex], value: randomIndex + 1 };
   };
 
-  // ✅ UPDATED: Install handler with UI message
+  // ✅ FIXED: Simple install handler
   const handleInstall = async () => {
-    console.log('🔄 Install clicked, current status:', isInstalled);
+    console.log('🔄 Install clicked');
     
     // Real-time check
-    const isCurrentlyInstalled = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    const isCurrentlyInstalled = 
+      window.matchMedia('(display-mode: standalone)').matches || 
+      navigator.standalone;
     
-    if (isCurrentlyInstalled || isInstalled) {
-      setShowAlreadyInstalled(true); // Show UI message instead of alert
+    if (isCurrentlyInstalled) {
+      setShowAlreadyInstalled(true);
       setShowInstallPrompt(false);
       setIsInstalled(true);
       return;
