@@ -20,9 +20,10 @@ export default function App() {
     "Mumbai", "Sydney", "Dubai", "Singapore", "Toronto"
   ]);
 
-  // ✅ NEW: Advanced Features State
+  // ✅ Advanced Features State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [showAlreadyInstalled, setShowAlreadyInstalled] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
   const [isDark, setIsDark] = useState(true);
   const [favorites, setFavorites] = useState([]);
@@ -44,15 +45,27 @@ export default function App() {
     }
   }, []);
 
-  // ✅ NEW: Check if app is already installed
+  // ✅ ENHANCED: Check if app is already installed
   useEffect(() => {
-    // Check if running in standalone mode (already installed)
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('🔍 Checking installation status...');
+    
+    // Multiple methods to detect installation
+    const checkInstalled = () => {
+      return (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        navigator.standalone ||
+        window.location.search.includes('installed=true')
+      );
+    };
+
+    if (checkInstalled()) {
+      console.log('✅ App is already installed');
       setIsInstalled(true);
     }
 
-    // Listen for app installed event
+    // Listen for new installations
     window.addEventListener('appinstalled', () => {
+      console.log('🎉 App installed event received');
       setIsInstalled(true);
       setShowInstallPrompt(false);
     });
@@ -163,19 +176,19 @@ export default function App() {
     return map[main] || "clear";
   };
 
-  // ✅ NEW: Add to favorites
+  // ✅ Add to favorites
   const addToFavorites = () => {
     if (weather && !favorites.includes(city)) {
       setFavorites([...favorites, city]);
     }
   };
 
-  // ✅ NEW: Remove from favorites
+  // ✅ Remove from favorites
   const removeFromFavorites = (cityToRemove) => {
     setFavorites(favorites.filter(fav => fav !== cityToRemove));
   };
 
-  // ✅ NEW: Share weather
+  // ✅ Share weather
   const shareWeather = async () => {
     if (weather) {
       const shareData = {
@@ -194,18 +207,24 @@ export default function App() {
     }
   };
 
-  // ✅ NEW: Get UV Index (mock data for now)
+  // ✅ Get UV Index (mock data for now)
   const getUVIndex = () => {
     const levels = ['Low', 'Moderate', 'High', 'Very High', 'Extreme'];
     const randomIndex = Math.floor(Math.random() * 5);
     return { level: levels[randomIndex], value: randomIndex + 1 };
   };
 
-  // ✅ UPDATED: Install handler with already installed check
+  // ✅ UPDATED: Install handler with UI message
   const handleInstall = async () => {
-    if (isInstalled) {
-      alert('✅ SkyTemp is already installed on your device!');
+    console.log('🔄 Install clicked, current status:', isInstalled);
+    
+    // Real-time check
+    const isCurrentlyInstalled = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    
+    if (isCurrentlyInstalled || isInstalled) {
+      setShowAlreadyInstalled(true); // Show UI message instead of alert
       setShowInstallPrompt(false);
+      setIsInstalled(true);
       return;
     }
 
@@ -217,6 +236,8 @@ export default function App() {
         setShowInstallPrompt(false);
         setIsInstalled(true);
       }
+    } else {
+      alert('⚠️ Install feature not available in this browser.');
     }
   };
 
@@ -336,8 +357,10 @@ export default function App() {
             </button>
             <button
               onClick={() => {
-                if (isInstalled) {
-                  alert('✅ SkyTemp is already installed on your device!');
+                const isCurrentlyInstalled = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+                
+                if (isCurrentlyInstalled) {
+                  setShowAlreadyInstalled(true); // Show UI message
                 } else {
                   setShowInstallPrompt(true);
                 }
@@ -379,38 +402,45 @@ export default function App() {
         </div>
       )}
 
-      {/* ✅ UPDATED: Install Prompt with already installed check */}
+      {/* Install Prompt */}
       {showInstallPrompt && (
         <div className="install-prompt-overlay">
           <div className="install-prompt">
             <div className="install-content">
-              <div className="install-icon">
-                {isInstalled ? '✅' : '📱'}
+              <div className="install-icon">📱</div>
+              <h3>Install SkyTemp App</h3>
+              <p>Get the best weather experience with our app! Works on desktop and mobile.</p>
+              <div className="install-buttons">
+                <button onClick={handleInstall} className="install-btn">
+                  Install Now
+                </button>
+                <button 
+                  onClick={() => setShowInstallPrompt(false)} 
+                  className="install-cancel"
+                >
+                  Maybe Later
+                </button>
               </div>
-              <h3>
-                {isInstalled ? 'Already Installed!' : 'Install SkyTemp App'}
-              </h3>
-              <p>
-                {isInstalled 
-                  ? 'SkyTemp is already installed on your device. Enjoy the app! 🎉'
-                  : 'Get the best weather experience with our app! Works on desktop and mobile.'
-                }
-              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ NEW: Already Installed Message */}
+      {showAlreadyInstalled && (
+        <div className="install-prompt-overlay">
+          <div className="install-prompt already-installed-prompt">
+            <div className="install-content">
+              <div className="install-icon">✅</div>
+              <h3>Already Installed!</h3>
+              <p>SkyTemp is already installed on your device. Enjoy the app! 🎉</p>
               <div className="install-buttons">
                 <button 
-                  onClick={handleInstall} 
+                  onClick={() => setShowAlreadyInstalled(false)} 
                   className="install-btn"
                 >
-                  {isInstalled ? 'Awesome! 🎉' : 'Install Now'}
+                  Awesome! 🎉
                 </button>
-                {!isInstalled && (
-                  <button 
-                    onClick={() => setShowInstallPrompt(false)} 
-                    className="install-cancel"
-                  >
-                    Maybe Later
-                  </button>
-                )}
               </div>
             </div>
           </div>
