@@ -303,6 +303,10 @@ html, body, #root, .weather-app {
   opacity: 0.7;
   cursor: not-allowed;
 }
+.search-bar input::placeholder { 
+  color: rgba(0, 0, 0, 0.7); 
+  font-weight: 400;
+}
 
 .search-loading .search-icon {
   animation: pulse 1.5s ease-in-out infinite;
@@ -331,16 +335,16 @@ html, body, #root, .weather-app {
 
 /* Error Message Box */
 .error-box {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(236, 72, 153, 0.15) 50%, rgba(99, 102, 241, 0.1) 100%);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  border: 1px solid rgba(168, 85, 247, 0.3);
   border-radius: 1.5rem;
   padding: 1.5rem 2rem;
   margin: 1rem 0;
   text-align: center;
   animation: slideDown 0.5s ease-out;
   box-shadow: 
-    0 10px 30px rgba(239, 68, 68, 0.2),
+    0 10px 30px rgba(168, 85, 247, 0.15),
     0 4px 15px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
@@ -354,9 +358,9 @@ html, body, #root, .weather-app {
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, 
-    rgba(239, 68, 68, 0.1) 0%, 
-    transparent 50%, 
-    rgba(220, 38, 38, 0.1) 100%);
+    rgba(168, 85, 247, 0.1) 0%, 
+    rgba(236, 72, 153, 0.05) 50%, 
+    rgba(99, 102, 241, 0.1) 100%);
   z-index: -1;
 }
 
@@ -369,8 +373,9 @@ html, body, #root, .weather-app {
 }
 
 .error-icon {
-  font-size: 2rem;
+  font-size: 2.5rem;
   animation: bounce 2s infinite;
+  filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.5));
 }
 
 .error-text {
@@ -378,31 +383,39 @@ html, body, #root, .weather-app {
 }
 
 .error-box h3 {
-  color: #fecaca;
-  font-size: 1.3rem;
-  font-weight: 700;
+  background: linear-gradient(135deg, #a855f7, #ec4899, #f59e0b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 1.8rem;
+  font-weight: 900;
   margin-bottom: 0.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  letter-spacing: -0.5px;
+  animation: shimmer 3s ease-in-out infinite;
 }
 
 .error-box p {
-  color: #fca5a5;
-  font-size: 1rem;
+  color: #ec4d20;
+  font-size: 1.1rem;
   margin: 0;
-  font-weight: 500;
-  opacity: 0.9;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
 }
 
 .error-suggestion {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(239, 68, 68, 0.3);
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(168, 85, 247, 0.2);
 }
 
 .error-suggestion p {
-  font-size: 0.9rem;
-  color: #fda4af;
-  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: whitesmoke;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .suggestion-list {
@@ -414,23 +427,30 @@ html, body, #root, .weather-app {
 }
 
 .suggestion-chip {
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.2));
+  border: 1px solid rgba(244, 114, 182, 0.5);
   border-radius: 50px;
-  padding: 0.5rem 1.2rem;
-  font-size: 0.85rem;
-  color: #fecaca;
+  padding: 0.7rem 1.5rem;
+  font-size: 0.9rem;
+  color: #fae8ff;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 500;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.2);
 }
 
 .suggestion-chip:hover {
-  background: rgba(239, 68, 68, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.5), rgba(236, 72, 153, 0.4));
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+  color: white;
 }
 
+@keyframes shimmer {
+  0%, 100% { background-position: -200% center; }
+  50% { background-position: 200% center; }
+}
 /* Loading Box */
 .loading-box {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%);

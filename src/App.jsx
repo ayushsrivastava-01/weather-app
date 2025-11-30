@@ -15,7 +15,7 @@ export default function App() {
   const [error, setError] = useState("");
   const [bgClass, setBgClass] = useState("clear");
   const [popularCities] = useState([
-    "London", "New York", "Tokyo", "Paris", "Delhi", 
+    "Noida", "Bengaluru", "Indore", "Bhopal", "Delhi", 
     "Mumbai", "Sydney", "Dubai", "Singapore", "Toronto"
   ]);
 
