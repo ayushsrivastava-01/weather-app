@@ -971,3 +971,10 @@ html, body, #root, .weather-app {
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   }
 }
+
+/* Force dark mode color scheme */
+@media (max-width: 768px) {
+  html, body {
+    color-scheme: dark;
+  }
+}
