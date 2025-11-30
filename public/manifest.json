@@ -1,0 +1,22 @@
+{
+  "name": "SkyTemp Weather",
+  "short_name": "SkyTemp",
+  "description": "Beautiful weather app with forecasts",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e3c72",
+  "theme_color": "#56ab2f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@bea1a9722a8c63169dcc06e86182bf2c55a76bbc/svg/color/generic.svg",
+      "sizes": "192x192",
+      "type": "image/svg"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTAwIiBmaWxsPSIjNTZBYjJGIi8+CjxwYXRoIGQ9Ik0yNTYgMTYwVjM1Mk0yNTYgMTYwTDMwNCAyMDhNMjU2IDE2MEwyMDggMjA4IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjMwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

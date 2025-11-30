@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js')
+      .then(function(registration) {
+        console.log('SW registered: ', registration);
+      })
+      .catch(function(registrationError) {
+        console.log('SW registration failed: ', registrationError);
+      });
+  });
+}
+
 const API_KEY = "171c829556b3a6f4a045d47d32ba0a8b";
 
 export default function App() {
