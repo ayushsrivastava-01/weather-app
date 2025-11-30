@@ -978,3 +978,53 @@ html, body, #root, .weather-app {
     color-scheme: dark;
   }
 }
+
+/* Force dark mode for mobile devices */
+@media (max-width: 768px) {
+  .weather-app {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    color: white !important;
+  }
+  
+  .weather-app::before {
+    display: none !important;
+  }
+  
+  /* Override all weather backgrounds with dark theme */
+  .weather-app.clear,
+  .weather-app.clouds,
+  .weather-app.rain,
+  .weather-app.thunder,
+  .weather-app.snow,
+  .weather-app.mist {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+  }
+  
+  /* Ensure text is visible */
+  .current-card, .card {
+    background: rgba(15, 23, 42, 0.8) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  /* Fix search input */
+  .search-bar input {
+    background: rgba(15, 23, 42, 0.8) !important;
+    color: white !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  .search-bar input::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+  
+  /* Ensure all text is white */
+  .current-card h1,
+  .current-card h2,
+  .current-card p,
+  .card h3,
+  .card p,
+  .footer p {
+    color: white !important;
+  }
+}
