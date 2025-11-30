@@ -168,8 +168,8 @@ html, body, #root, .weather-app {
   border-radius: 50px;
   background: rgba(255, 255, 255, 0.15);
   border: 2px solid rgba(255, 255, 255, 0.3);
-  color: rgb(222, 228, 249);
-  font-weight: 500;
+  color:black;
+  font-weight: 550;
   font-size: 1rem;
   backdrop-filter: blur(20px);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
