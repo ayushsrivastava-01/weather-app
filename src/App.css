@@ -831,7 +831,20 @@ html, body, #root, .weather-app {
   .loading-box {
     padding: 1.2rem 1.5rem;
   }
-  
+   .h-item, .d-item {
+    background: rgba(24, 8, 24, 0.53) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .h-item:hover, .d-item:hover {
+    background: rgba(155, 172, 56, 0.934) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  }
+
+  /* Ensure all text in these sections is white */
+  .h-item p, .d-item p {
+    color: white !important;
+  }
   .loading-content {
     flex-direction: column;
     text-align: center;
