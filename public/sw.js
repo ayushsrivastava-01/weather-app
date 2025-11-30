@@ -1,30 +1,20 @@
-const CACHE_NAME = 'skytemp-v1.0';
-const urlsToCache = [
-  '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
-  '/manifest.json'
-];
+// Simple Service Worker - SkyTemp
+const CACHE_NAME = 'skytemp-v3';
 
-self.addEventListener('install', function(event) {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-  );
+// Install event
+self.addEventListener('install', (event) => {
+  console.log('🚀 Service Worker installing...');
+  self.skipWaiting(); // Important - immediately activate
 });
 
-self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request)
-      .then(function(response) {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
-  );
+// Activate event  
+self.addEventListener('activate', (event) => {
+  console.log('✅ Service Worker activated!');
+  event.waitUntil(self.clients.claim()); // Take control immediately
+});
+
+// Fetch event - basic
+self.addEventListener('fetch', (event) => {
+  // Let all requests go to network
+  event.respondWith(fetch(event.request));
 });

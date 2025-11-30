@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
+useEffect(() => {
+  console.log('📱 Checking service worker...');
+  
+  if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
-      .then(function(registration) {
-        console.log('SW registered: ', registration);
+      .then((registration) => {
+        console.log('🎉 Service Worker registered!', registration);
+        console.log('Scope:', registration.scope);
       })
-      .catch(function(registrationError) {
-        console.log('SW registration failed: ', registrationError);
+      .catch((error) => {
+        console.log('❌ Service Worker registration failed:', error);
       });
-  });
-}
-
+  } else {
+    console.log('❌ Service Worker not supported');
+  }
+}, []);
 const API_KEY = "171c829556b3a6f4a045d47d32ba0a8b";
 
 export default function App() {
