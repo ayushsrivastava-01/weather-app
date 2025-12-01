@@ -269,6 +269,7 @@ export default function App() {
     }
   };
 
+
   const fetchAllData = async (query) => {
     try {
       setLoading(true);
@@ -396,7 +397,7 @@ export default function App() {
               className="nav-btn"
               title={isInstalled ? 'Already Installed' : 'Install App'}
             >
-              {isInstalled ? '✅' : '📱'}
+              {isInstalled ? '☑️' : '📱'}
             </button>
             <button
               onClick={() => setUnit((u) => (u === "metric" ? "imperial" : "metric"))}
@@ -467,7 +468,7 @@ export default function App() {
                   onClick={() => setShowAlreadyInstalled(false)} 
                   className="install-btn"
                 >
-                  Awesome! 🎉
+                  Ok! ✔️
                 </button>
               </div>
             </div>
