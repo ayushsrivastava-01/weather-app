@@ -264,7 +264,7 @@ export default function App() {
       if (isInstalled) {
         setShowAlreadyInstalled(true);
       } else {
-        alert('⚠️ Seems like SkyTemp is already installed on your device/nPlease check it out.');
+        alert('⚠️ Seems like SkyTemp is already installed on your device...Please check it out.');
       }
     }
   };
