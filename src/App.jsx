@@ -264,7 +264,7 @@ export default function App() {
       if (isInstalled) {
         setShowAlreadyInstalled(true);
       } else {
-        alert('⚠️ Install feature not available in this browser.');
+        alert('⚠️ Seems like SkyTemp is already installed on your device/nPlease check it out.');
       }
     }
   };
