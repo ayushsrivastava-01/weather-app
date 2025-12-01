@@ -3,7 +3,7 @@ const CACHE_NAME = 'skytemp-advanced-v1';
 const urlsToCache = [
   '/',
   '/manifest.json',
-  '/weather_icon.png'
+  '/app_icon.jpg'
 ];
 
 // Install event
