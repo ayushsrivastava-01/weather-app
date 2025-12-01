@@ -460,7 +460,7 @@ export default function App() {
         <div className="install-prompt-overlay">
           <div className="install-prompt already-installed-prompt">
             <div className="install-content">
-              <div className="install-icon">✅</div>
+              <div className="install-icon">☑️</div>
               <h3>Already Installed!</h3>
               <p>SkyTemp is already installed on your device. Enjoy the app! 🎉</p>
               <div className="install-buttons">
