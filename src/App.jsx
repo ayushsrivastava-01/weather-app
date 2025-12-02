@@ -486,6 +486,7 @@ export default function App() {
               placeholder="Enter city name..."
               disabled={loading}
               className={loading ? 'search-loading' : ''}
+              required
             />
           </div>
           <div className="search-buttons">
